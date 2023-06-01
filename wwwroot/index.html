@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PSPDFKit for Windows</title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            -ms-content-zooming: none;
+        }
+
+        #pspdfkit {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <link href="css/app.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+</head>
+<body>
+    <input type="file" id="filePicker" style="display:none">
+    <div id="app">Loading...</div>
+    <script type="text/javascript" src="pspdfkit.js"></script>
+    <script src="_framework/blazor.webview.js" autostart="false"></script>
+<script type="text/javascript">
+        var results = []
+        var currentInstance;
+        const filePicker = document.getElementById('filePicker');
+        filePicker.addEventListener('change', handleFileChange);
+
+        let t0;
+
+        function startRecording() {
+            const timeLabel = document.getElementById('time');
+            timeLabel.innerHTML = "Calculating load time ...";
+            t0 = performance.now();
+        }
+
+        // We need to inform PSPDFKit where to look for its library assets, i.e. the location of the `pspdfkit-lib` directory.
+        const baseUrl = `${window.location.protocol}//${window.location.host}/`;
+
+        function handleFileChange(event) {
+            const timeLabel = document.getElementById('time');
+            const selectedFile = filePicker.files[0];
+            console.log(filePicker.files);
+            timeLabel.innerHTML = "Calculating load time ...";
+            t0 = performance.now();
+            const fileURL = URL.createObjectURL(selectedFile);
+
+            PSPDFKit.load({
+                baseUrl,
+                container: "#pspdfkit",
+                document: fileURL
+            }).then(instance => {
+                currentInstance = instance;
+                console.log("PSPDFKit loaded", instance);
+                const t1 = performance.now();
+                timeLabel.innerHTML = `Execution time: ${(t1 - t0).toFixed(2)} milliseconds.`;
+            }).catch(error => {
+                console.error(error.message);
+            });
+        }
+
+        function openFile() {
+            filePicker.click();
+            PSPDFKit.unload("#pspdfkit")
+
+            return {
+                'success': true
+            }
+        }
+        
+        function getResult(id) {
+            try {
+                var numId = Number(id);
+                var requestedResult = results[numId];
+                delete results[numId]
+                return requestedResult;
+            } catch (ex) {
+                return {
+                    'error': JSON.stringify(ex.toString())
+                }
+            }
+        }
+    </script>
+</body>
+</html>

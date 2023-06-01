@@ -1,0 +1,14 @@
+﻿@page "/"
+@inject IJSRuntime jsRuntime
+
+<button @onclick="OpenPDF">Open</button>
+<label id="time" style="text-align: right; margin-right: 2rem; font-weight: bold">Will record time to load file</label>
+<div id="pspdfkit" style="width: 100%; height: 95vh;"></div>
+
+@code
+{
+	private async void OpenPDF()
+	{
+		await jsRuntime.InvokeVoidAsync("openFile");
+	}
+}
